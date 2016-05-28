@@ -1,6 +1,6 @@
 # pencli - prototyping anywhere
 
-pencli is a portable tool to quickly create a fully configured Front-End project based on [Protopen template](https://github.com/huytd/protopen)
+pencli is a command line tool to quickly create a fully configured Front-End project based on [Protopen template](https://github.com/huytd/protopen)
 
 ## What's in the box?
 
