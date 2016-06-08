@@ -18,6 +18,34 @@ func codename() string {
 	return fmt.Sprintf("%s-%s-%d", adjs[r.Intn(len(adjs))], nouns[r.Intn(len(nouns))], r.Intn(9999-1000)+1000)
 }
 
+func createProject(args []string, gitUrl string) string {
+	project := ""
+	if len(args) < 2 {
+		// Generating random name
+		project = codename()
+	} else {
+		project = args[1]
+	}
+	fmt.Println("Generating new pen:", project)
+
+	cloneCmd := "git"
+	cloneArgs := []string{"clone", gitUrl, project}
+	if cloneErr := exec.Command(cloneCmd, cloneArgs...).Run(); cloneErr != nil {
+		fmt.Println("Oops! Sorry I can't do it right now :(")
+		fmt.Fprintln(os.Stderr, cloneErr)
+		os.Exit(1)
+	}
+
+	gitRmCmd := "rm"
+	gitRmArgs := []string{"-rf", project + "/.git"}
+	if gitRmErr := exec.Command(gitRmCmd, gitRmArgs...).Run(); gitRmErr != nil {
+		fmt.Println("Oops! You have to remove git in your pen manually, sorry dude!")
+		fmt.Fprintln(os.Stderr, gitRmErr)
+		os.Exit(1)
+	}
+	return project
+}
+
 func main() {
 	if _, giterr := exec.LookPath("git"); giterr != nil {
 		println("Sorry dude! You're cool but you don't have Git!")
@@ -28,33 +56,14 @@ func main() {
 	args := os.Args[1:]
 
 	if len(args) > 0 && args[0] == "new" {
-		project := ""
-		if len(args) < 2 {
-			// Generating random name
-			project = codename()
-		} else {
-			project = args[1]
-		}
-		fmt.Println("Generating new pen:", project)
-
-		cloneCmd := "git"
-		cloneArgs := []string{"clone", "http://github.com/huytd/protopen", project}
-		if cloneErr := exec.Command(cloneCmd, cloneArgs...).Run(); cloneErr != nil {
-			fmt.Println("Oops! Sorry I can't do it right now :(")
-			fmt.Fprintln(os.Stderr, cloneErr)
-			os.Exit(1)
-		}
-
-		gitRmCmd := "rm"
-		gitRmArgs := []string{"-rf", project + "/.git"}
-		if gitRmErr := exec.Command(gitRmCmd, gitRmArgs...).Run(); gitRmErr != nil {
-			fmt.Println("Oops! You have to remove git in your pen manually, sorry dude!")
-			fmt.Fprintln(os.Stderr, gitRmErr)
-			os.Exit(1)
-		}
-
-		fmt.Println("OK, we're done!\nDon't forget to run:\n\n   npm install\n\nIn " + project + " folder before you start!")
+		// Create new protopen project
+		projectName := createProject(args, "http://github.com/huytd/protopen")
+		fmt.Println("OK, we're done!\nDon't forget to run:\n\n   npm install\n\nIn " + projectName + " folder before you start!")
+	} else if len(args) > 0 && args[0] == "iron" {
+		// Create new irongo project
+		projectName := createProject(args, "http://github.com/huytd/irongo")
+		fmt.Println("OK, we're done!\nDon't forget to run:\n\n   make\n\nIn " + projectName + " folder before you start!")
 	} else {
-		fmt.Println("What's up? Don't know what to do?\nTry this:\n\n   pen new something-cool-123")
+		fmt.Println("What's up? Don't know what to do?\nTry this:\n\n   pen new/iron something-cool-123")
 	}
 }
